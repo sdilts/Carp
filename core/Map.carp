@@ -69,7 +69,7 @@
     @(Pair.b (Array.nth (entries b) i)))
 
   (defn set-idx [b i val]
-    (do (Array.aupdate! (entries &b) i &(fn [p] (Pair.set-b @p @val)))
+    (do (Array.aupdate! (entries &b) i &(fn [p] (Pair.set-b p @val)))
         b))
 
   (defn push-back [b k v]

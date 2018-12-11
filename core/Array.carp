@@ -140,12 +140,12 @@
 
   (doc aupdate "Transmute the element at index i of array a using function f.")
   (defn aupdate [a i f]
-    (let [new-value (~f (nth &a i))]
+    (let [new-value (~f @(nth &a i))]
       (aset a i new-value)))
 
   (doc aupdate! "Transmute the element at index i of array a using function f in place.")
   (defn aupdate! [a i f]
-    (aset! a i (~f (nth a i))))
+    (aset! a i (~f @(nth a i))))
 
   (doc swap "Swap indices i and j of array a.")
   (defn swap [a i j]

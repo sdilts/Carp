@@ -308,7 +308,7 @@
                     defn
                 </div>
                 <p class="sig">
-                    (λ [(Array a), Int, (Ref (λ [&amp;a] a))] (Array a))
+                    (λ [(Array a), Int, (Ref (λ [a] a))] (Array a))
                 </p>
                 <pre class="args">
                     (aupdate a i f)
@@ -328,7 +328,7 @@
                     defn
                 </div>
                 <p class="sig">
-                    (λ [(Ref (Array a)), Int, (Ref (λ [&amp;a] a))] ())
+                    (λ [(Ref (Array a)), Int, (Ref (λ [a] a))] ())
                 </p>
                 <pre class="args">
                     (aupdate! a i f)
