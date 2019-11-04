@@ -1,3 +1,4 @@
+# C Interop
 Interfacing C libraries with Carp programs requires 4 steps:
 1. Include any required library header files.
 2. Add the required information needed for building.
@@ -31,7 +32,7 @@ being a stand in for `char*`. This means that any C function or struct that uses
 usable in Carp. The same concept applies to structures: most structures in C are directly translatable to
 Carp structures and vice versa, with the exception of structures containing unions or arrays, which have no
 directly translatable type in Carp. There are workarounds for
-including arrays in structures detailed in [Workarounds for C arrays][###workarounds-for-C-arrays]
+including arrays in structures detailed in [Workarounds for C arrays](#workarounds-for-c-arrays)
 
 ### Registering opaque types
 Use the `register-type` function:
@@ -70,7 +71,7 @@ Is registered as:
 			      capacity Int])
 ```
 However, it is impossible to register structs that contain a fixed
-sized array:
+sized array. See issue [#507](https://github.com/carp-lang/Carp/issues/507) for updates on this topic.
 ``` C
 struct example {
        // impossible to register:
