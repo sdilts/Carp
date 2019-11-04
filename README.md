@@ -25,6 +25,7 @@ The key features of Carp are the following:
 * [The Compiler Manual](docs/Manual.md) - how to compile code and configure your projects
 * [Carp Language Guide](docs/LanguageGuide.md) - syntax and semantics of the language
 * [Libraries](docs/Libraries.md) - how to work with libraries and modules
+* [C Interop](docs/CInterop.md) - how to import existing C libraries
 * [Tooling](docs/Tooling.md) - supported editors
 * [Game Example](examples/reptile.carp) - a Snake clone in Carp
 
