@@ -1,0 +1,73 @@
+(defndynamic reverse-helper [lst accum]
+  (if (not (= 0 (length lst)))
+    (reverse-helper (cdr lst) (cons (car lst) accum))
+    accum))
+
+(defndynamic reverse [lst]
+  (reverse-helper lst ()))
+
+(defndynamic plist-get [plist key]
+  (if (not (= 0 (length plist)))
+    (if (= (car plist) key)
+      (car (cdr plist))
+      (getf (cdr (cdr plist)) key))
+    ()))
+
+(defndynamic plist-remove-helper [plist key accum]
+  (if (not (= 0 (length plist)))
+    (if (= (car plist) key)
+      (append (reverse accum) (cdr (cdr plist)))
+      (remf-helper (cdr (cdr plist)) key (Dynamic.cons (cadr plist) (cons (car plist) accum))))
+    ()))
+
+(defndynamic plist-remove [plist key]
+  (remf-helper plist key ()))
+
+(defndynamic plist-set-helper [plist key item accum]
+  (if (not (= 0 (length plist)))
+    (if (= (car plist) key)
+      (append (reverse (cons item (cons key accum))) (cdr (cdr plist)))
+      (plist-set-helper (cdr (cdr plist)) key item
+                        (Dynamic.cons (cadr plist) (cons (car plist) accum))))
+    (reverse (cons item (cons key accum)))))
+
+(defndynamic plist-set [plist key item]
+  (plist-set-helper plist key item ()))
+
+(defndynamic make-keyword [thing]
+  (if (symbol? thing)
+    (Dynamic.Symbol.join [': thing])
+    ()))
+
+(defndynamic keywordp [thing]
+  (if (symbol? thing)
+    (= (Dynamic.String.char-at (str thing) 0) \:)
+    false))
+
+
+(defndynamic build-keyword-binding [lambda-list source accum]
+  (if (not (= (length lambda-list) 0))
+    (let [item (car lambda-list)]
+      (if (keywordp item)
+        (macro-error "Cannot have multiple keyword designators in the same branch")
+        (let [lookup (make-keyword item)]
+          (build-keyword-binding (cdr lambda-list)
+                                 source
+                                 (append (list (list 'plist-get source lookup) item)
+                                         accum)))))
+    accum))
+
+(defndynamic build-let-binding [lambda-list index source accum]
+  (if (not (= (length lambda-list) 0))
+    (let [item (car lambda-list)]
+      (if (list? item)
+        (let [nested-loc (gensym)]
+          (append (Dynamic.append (build-let-binding item 0 nested-loc ())
+                                  (list (list 'nthcar index source) nested-loc))
+                  (build-let-binding (cdr lambda-list) (+ 1 index) source accum)))
+        (build-let-binding (cdr lambda-list) (+ 1 index) source (cons (list 'nthcar index source)
+                                                                    (cons item accum)))))
+    accum))
+
+;; (defmacro destructuring-bind [lambda-list source :rest body]
+;;   )
