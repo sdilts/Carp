@@ -59,29 +59,54 @@
     false))
 
 
-(defndynamic build-keyword-binding [lambda-list source accum]
+(defndynamic build-keyword-list-binding [lambda-list source accum]
   (if (not (= (length lambda-list) 0))
     (let [item (car lambda-list)]
       (if (keywordp item)
         (macro-error "Cannot have multiple keyword designators in the same branch")
         (let [lookup (make-keyword item)]
-          (build-keyword-binding (cdr lambda-list)
+          (build-keyword-list-binding (cdr lambda-list)
                                  source
-                                 (append (list (list 'plist-get source lookup) item)
+                                 (append (list (list 'plist-get source (list 'quote lookup)) item)
                                          accum)))))
     accum))
 
-(defndynamic build-let-binding [lambda-list index source accum]
+(defndynamic build-body-list-binding [lambda-list source]
+  (list source (car lambda-list)))
+
+(defndynamic build-keyword-binding [lambda-list source]
+  (let [item (car lambda-list)]
+    (if (= ':rest item)
+      (build-body-list-binding (cdr lambda-list) source)
+      (if (= ':key item)
+        (build-keyword-list-binding (cdr lambda-list) source ())
+        (macro-error (Dynamic.String.join ["Macro lambda-list keyword unrecognized " (str item)]))))))
+
+(defndynamic build-let-binding-inner [lambda-list index source accum]
   (if (not (= (length lambda-list) 0))
     (let [item (car lambda-list)]
       (if (list? item)
-        (let [nested-loc (gensym)]
-          (append (Dynamic.append (build-let-binding item 0 nested-loc ())
-                                  (list (list 'nthcar index source) nested-loc))
-                  (build-let-binding (cdr lambda-list) (+ 1 index) source accum)))
-        (build-let-binding (cdr lambda-list) (+ 1 index) source (cons (list 'nthcar index source)
-                                                                    (cons item accum)))))
+        (let [nested-loc (gensym-with 'build-let)]
+          (append (Dynamic.append (build-let-binding-inner item 0 nested-loc ())
+                                  (list (list 'my-nth index source) nested-loc))
+                  (build-let-binding-inner (cdr lambda-list) (+ 1 index) source accum)))
+        (if (keywordp item)
+          (let [nested-loc (gensym-with 'build-keyword)]
+            (append (append (build-keyword-binding lambda-list nested-loc)
+                            (list (list 'my-nthcdr index source) nested-loc))
+                    accum))
+          (build-let-binding-inner (cdr lambda-list) (+ 1 index) source (cons (list 'my-nth index source)
+                                                                    (cons item accum))))))
     accum))
 
-;; (defmacro destructuring-bind [lambda-list source :rest body]
-;;   )
+(defndynamic build-let-binding [lambda-list source]
+  (build-let-binding-inner lambda-list 0 source ()))
+
+(defndynamic unwind-let [bindings body]
+  (if (not (= (length bindings) 0))
+    (let [inital-form (car bindings)
+          var-name (my-nth 1 bindings)]
+      (unwind-let (cdr (cdr bindings)) (list (append (list 'let (array var-name inital-form))
+                                               body))))
+    body))
+
