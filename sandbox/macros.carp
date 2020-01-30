@@ -6,6 +6,20 @@
 (defndynamic reverse [lst]
   (reverse-helper lst ()))
 
+(defndynamic my-nth [x lst]
+  (if (not (= (length lst) 0))
+    (if (= x 0)
+      (car lst)
+      (my-nth (- x 1) (cdr lst)))
+    (macro-error "my-nth: x provided was too big")))
+
+(defndynamic my-nthcdr [x lst]
+  (if (not (= (length lst) 0))
+    (if (= x 0)
+      lst
+      (my-nthcdr (- x 1) (cdr lst)))
+    (macro-error "my-nthcdr: No list left to cdr")))
+
 (defndynamic plist-get [plist key]
   (if (not (= 0 (length plist)))
     (if (= (car plist) key)
