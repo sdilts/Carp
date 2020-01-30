@@ -10,7 +10,7 @@
   (if (not (= 0 (length plist)))
     (if (= (car plist) key)
       (car (cdr plist))
-      (getf (cdr (cdr plist)) key))
+      (plist-get (cdr (cdr plist)) key))
     ()))
 
 (defndynamic plist-remove-helper [plist key accum]
