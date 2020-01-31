@@ -110,3 +110,7 @@
                                                body))))
     body))
 
+(defmacro destructuring-bind [lambda-list source :rest body]
+  (let [source-symb (gensym-with 'source)]
+    (append (list 'let (array source-symb source))
+            (unwind-let (build-let-binding lambda-list source-symb) body))))
