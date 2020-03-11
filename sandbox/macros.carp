@@ -4,7 +4,9 @@
     accum))
 
 (defndynamic reverse [lst]
-  (reverse-helper lst ()))
+  (if (array? lst)
+     (reverse-helper lst [])
+     (reverse-helper lst ())))
 
 (defndynamic my-nth [x lst]
   (if (not (= (length lst) 0))
@@ -85,7 +87,7 @@
 (defndynamic build-let-binding-inner [lambda-list index source accum]
   (if (not (= (length lambda-list) 0))
     (let [item (car lambda-list)]
-      (if (list? item)
+      (if (Dynamic.or (array? item) (list? item))
         (let [nested-loc (gensym-with 'build-let)]
           (append (Dynamic.append (build-let-binding-inner item 0 nested-loc ())
                                   (list (list 'my-nth index source) nested-loc))
@@ -114,3 +116,15 @@
   (let [source-symb (gensym-with 'source)]
     (append (list 'let (array source-symb source))
             (unwind-let (build-let-binding lambda-list source-symb) body))))
+
+(defdynamic macro-plist ())
+
+(defmacro my-defmacro [name lambda-list :rest body]
+  (list
+   'defdynamic 'macro-plist
+   (list 'plist-set 'macro-plist
+         (list 'quote name)
+         (list 'fn (array 'form)
+               (list 'destructuring-bind lambda-list (list 'cdr 'form)
+                     (append (list 'do)
+                             body))))))
